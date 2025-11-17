@@ -1,0 +1,9 @@
+faiss-cpu
+numpy
+torch
+sentence-transformers
+PyPDF2
+python-docx
+python-magic
+tqdm
+python-dateutil

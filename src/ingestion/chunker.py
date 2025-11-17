@@ -25,9 +25,9 @@ def chunk_text(text: str, max_tokens: int = 500, overlap: int = 50) -> list[str]
     print('Chunks\n',chunks)
     return chunks
 
-
-words = """Artificial intelligence enables machines to perform tasks that typically require human intelligence. 
-Machine learning is a subset of AI focused on building systems that learn from data. 
-Deep learning, a branch of ML, uses neural networks to model complex patterns.
-"""
-chunk_text(words,5,3)
+if __name__=="__main__":
+    words = """Artificial intelligence enables machines to perform tasks that typically require human intelligence. 
+    Machine learning is a subset of AI focused on building systems that learn from data. 
+    Deep learning, a branch of ML, uses neural networks to model complex patterns.
+    """
+    chunk_text(words,5,3)
