@@ -1,1 +1,55 @@
-venv/
+# OS garbage
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+
+# Node.js
+node_modules/
+dist/
+build/
+
+# JavaScript bundlers
+.cache/
+.nyc_output/
+
+# Vite / Next / React
+.next/
+out/
+coverage/
+
+# Editors
+.vscode/
+.idea/
+
+# Dependencies
+vendor/
+packages-lock.json (if using yarn only)
+
+# Compiled binaries
+*.exe
+*.dll
+*.class
+*.o
+*.so
+*.a
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
