@@ -7,7 +7,7 @@ class EmbeddingModel:
     Handles embedding generation for text using a local model.
     """
 
-    def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
+    def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L12-v2"):
         # Load the model locally (no API calls)
         print(f"[EmbeddingModel] Loading model: {model_name}")
         self.model = SentenceTransformer(model_name)

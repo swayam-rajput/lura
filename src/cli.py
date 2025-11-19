@@ -1,10 +1,10 @@
 from embeddings.embedder import EmbeddingModel
-from ingestion.pdf_loader import extract_text_from_pdf
 from ingestion.text_loader import load_text
 from ingestion.chunker import chunk_text
 from vector_store.faiss_store import FaissStore
 from query_pipeline.retrieve import Retriever
 import os
+from llm.local_llm import LLM
 
 class MetaData:
     def __init__(self,file_path=None,texts=None,chunks=None,vectors=None):
@@ -25,32 +25,53 @@ class MetaData:
             "total_chars": self.total_chars
         }
 
-# def ingest_directory(folder_path):
-#     embeds = EmbeddingModel()
+def ingest_directory(folder_path: str):
+    """
+    Ingest every supported file inside a directory (recursively).
+    """
+    fs = FaissStore()                 # loads existing index automatically
+    embedder = EmbeddingModel()
 
-#     fs = FaissStore()   # uses existing index file or creates new one
-#     all_chunks = []
-#     all_vectors = []
+    supported_extensions = {".txt", ".md", ".pdf", ".docx"}
 
-#     for root, _, files in os.walk(folder_path):
-#         for f in files:
-#             file_path = os.path.join(root, f)
+    for root, _, files in os.walk(folder_path):
+        for file in files:
+            path = os.path.join(root, file)
+            ext = os.path.splitext(file)[1].lower()
 
-#             try:
-#                 text = load_text(file_path)
-#             except:
-#                 print(f"Skipping unreadable file: {file_path}")
-#                 continue
+            if ext not in supported_extensions:
+                print(f"Skipping unsupported file: {path}")
+                continue
 
-#             chunks = chunk_text(text)
+            try:
+                text = load_text(path)
+            except Exception as e:
+                print(f"Could not read {path}: {e}")
+                continue
 
-#             vectors = embeds.embed_texts(chunks)
+            chunks = chunk_text(text)
+            vectors = embedder.embed_texts(chunks)
 
-#             fs.add_vectors(vectors, chunks)
-#             print(f"[Ingested] {file_path} → {len(chunks)} chunks")
+            fs.add_vectors(vectors, chunks, file_path=path)
+            print(f"[Ingested] {path} → {len(chunks)} chunks")
 
-#     fs.save_index()
-#     print("\n>>> Directory ingestion complete.")
+    fs.save_index()
+    print("\n>>> Directory ingestion complete.\n")
+
+
+def ingest_file(path:str):
+    texts = load_text(path)
+    chunks = chunk_text(texts)
+    embeds = EmbeddingModel()
+    
+    vectors = embeds.embed_texts(chunks)
+    data = MetaData(path,texts,chunks,vectors)
+    fs = FaissStore()
+    print(len(data.vectors),len(data.chunks))
+    print(data.chunks)
+    fs.add_vectors(data.vectors,data.chunks)
+    fs.save_index()
+            
 
 def main():
 
@@ -69,24 +90,11 @@ def main():
         if choice == "1":
             
             file_path = input("Enter file path: ").strip()
-            texts = load_text(file_path)
-            chunks = chunk_text(texts)
-            embeds = EmbeddingModel()
-            
-            vectors = embeds.embed_texts(chunks)
-            data = MetaData(file_path,texts,chunks,vectors)
-            fs = FaissStore()
-            print(len(data.vectors),len(data.chunks))
-            print(data.chunks)
-            fs.add_vectors(data.vectors,data.chunks)
-            fs.save_index()
-            
-            
-
-
-        # elif choice == "2":
-        #     folder = input("Enter directory path: ").strip()
-        #     ingest_directory(folder)
+            ingest_file(file_path)
+    
+        elif choice == "2":
+            folder = input("Enter directory path: ").strip()
+            ingest_directory(folder)
 
         # elif choice == "3":
         #     build_vector_index()
@@ -98,13 +106,32 @@ def main():
             result = Retriever().search(query)
             print("\n----- Query Response -----\n")
             for i,value in enumerate(result):
-                print(i,value['text'][:10],value['score'])
+                print(i,value['text'],(value['score']),sep='\n')
             # print(result)
             print("\n--------------------------\n")
 
-        # elif choice == "5":
-        #     print("Shutting down operational workflow.")
-        #     sys.exit(0)
+        elif choice == "5":
+            print("Shutting down operational workflow.")
+            # sys.exit(0)
+            return
+
+        # LLM (RAG)
+        # elif choice == "6":
+        #     question = input("Enter your question: ").strip()
+
+        #     retriever = Retriever()
+        #     chunks = retriever.search(question)
+
+        #     if not chunks:
+        #         print("No context found.")
+        #         continue
+
+        #     llm = LLM()
+        #     answer = llm.generate_answer(question, chunks)
+
+        #     print("\n==================== AI ANSWER ====================\n")
+        #     print(answer)
+        #     print("\n====================================================\n")
 
         else:
             print("Invalid selection. Please choose a valid menu option.")    

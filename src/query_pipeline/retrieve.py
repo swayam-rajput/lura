@@ -2,7 +2,7 @@ from embeddings.embedder import EmbeddingModel
 from vector_store.faiss_store import FaissStore
 
 class Retriever:
-    def __init__(self, store_path='vector_index.faiss',chunks=None):
+    def __init__(self, store_path='src/vector_index.faiss',chunks=None):
         self.store = FaissStore(dim=384,index_path=store_path)
         self.chunks = chunks
     
