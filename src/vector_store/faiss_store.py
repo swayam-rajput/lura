@@ -105,8 +105,25 @@ class FaissStore:
         faiss.normalize_L2(query_vector)
         scores, indices = self.index.search(query_vector, k)
 
+        s = scores[0]      # flatten to 1D
+        idxs = indices[0]
+
+        if len(s) == 0:
+            return []
+
+        top = float(s[0])
+        second = float(s[1]) if len(s) > 1 else 0.0
+
+        if top < 0.22:          
+            return []
+
+        if abs(top - second) < 0.03:
+            return []
+
         results = []
-        for idx, score in zip(indices[0], scores[0]):
+        for idx, score in zip(idxs, s):
+            if score < 0.22:
+                continue
             if 0 <= idx < len(self.documents):
                 results.append({
                     "id": idx,

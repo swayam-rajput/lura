@@ -101,13 +101,23 @@ def main():
 
         elif choice == "4":
             query = input("Enter your query: ").strip()
-            embedded_text = EmbeddingModel().embed_query(query)
-
+            
             result = Retriever().search(query)
+            
+
+
             print("\n----- Query Response -----\n")
-            for i,value in enumerate(result):
-                print(i,value['text'],(value['score']),sep='\n')
-            # print(result)
+            
+            if not result:
+                print("No relevant results found.\nYour query does not match anything in the indexed data.")
+                print("--------------------------\n")
+                input('> ')
+                continue
+            
+            for i,r in enumerate(result):
+                print(f"[{i}] Score: {r['score']:.4f}")
+                print("    Text :",r['text'].replace('\n',' '))
+            
             print("\n--------------------------\n")
 
         elif choice == "5":
