@@ -1,17 +1,48 @@
 from embeddings.embedder import EmbeddingModel
 from vector_store.faiss_store import FaissStore
+import numpy as np
+
 
 class Retriever:
-    def __init__(self, store_path='src/vector_index.faiss',chunks=None):
-        self.store = FaissStore(dim=384,index_path=store_path)
-        self.chunks = chunks
+    def __init__(self, index_path='src/vector_index.faiss',top_k:int = 5,chunks=None):
+        self.index_path = index_path
+        self.top_k = top_k
+        
+        self.embedder = EmbeddingModel()
+        try:
+            self.dim = self.embedder.dim
+        except:
+            self.dim = 384
+        
+        self.store = FaissStore(self.dim,index_path=index_path)
+        try:
+            self.store.load_index()
+        except:
+            print('[Retriever] Warning: Index failed to load')
     
-    def search(self,query, k=3):
+
+    def _embed(self, text:str)-> np.ndarray:
+        """Embed a query string"""
+        if hasattr(self.embedder,"embed_query"):
+            vec = self.embedder.embed_query(text)
+        else:
+            vec = self.embedder.embed_texts([text])
+        
+        vec = np.asarray(vec,dtype=np.float32)
+        if vec.ndim == 1:
+            vec = vec.reshape(1,-1)
+        return vec
+    
+
+    def search(self, query:str, k:int=None):
         """Embed query, search FAISS, returns top-k text chunks"""
-        if not self.store:
-            print('Error: Index not loaded.')
-            return None
-        query_vector = EmbeddingModel().embed_query(query)
+        k = k or self.top_k
+
+        if not self.store.index or self.store.index.ntotal == 0:
+            print('[Retriever Error]: No vectors inside FAISS index.')
+            return []
+        
+        query_vector = self._embed(query)
         results = self.store.search_vectors(query_vector,k=k)
         
         # results = [(self.chunks[i],float(scores[0][j])) for j, i in enumerate(ids[0])]

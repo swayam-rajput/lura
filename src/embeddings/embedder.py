@@ -11,6 +11,7 @@ class EmbeddingModel:
         # Load the model locally (no API calls)
         print(f"[EmbeddingModel] Loading model: {model_name}")
         self.model = SentenceTransformer(model_name)
+        self.dim = self.model.get_sentence_embedding_dimension()
 
     def embed_texts(self, texts: list[str]) -> np.ndarray:
         """

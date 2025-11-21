@@ -3,12 +3,14 @@ import numpy as np
 import os
 import json
 
+INDEX_PATH = "src/vector_index.faiss"
+
 class FaissStore:
     """
     Local vector database using FAISS + JSON metadata
     """
 
-    def __init__(self, dim: int = 384, index_path: str = 'src/vector_index.faiss'):
+    def __init__(self, dim: int = 384, index_path: str = INDEX_PATH):
         self.dim = dim
         self.index_path = index_path
         self.meta_path = index_path + ".meta"

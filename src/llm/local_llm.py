@@ -1,6 +1,9 @@
 # src/llm/local_llm.py
 from transformers import AutoTokenizer, AutoModelForCausalLM
+from ctransformers import AutoModelForCausalLM
 import torch
+import threading
+
 
 class LLM:
     def __init__(self, model_name="microsoft/phi-2", device=None):
