@@ -126,22 +126,22 @@ def main():
             return
 
         # LLM (RAG)
-        # elif choice == "6":
-        #     question = input("Enter your question: ").strip()
+        elif choice == "6":
+            from query_pipeline.rag import run_rag
+            question = input("Enter your question: ").strip()
+            answer, chunks = run_rag(question)
 
-        #     retriever = Retriever()
-        #     chunks = retriever.search(question)
+            print('Answer:\n>',answer)
 
-        #     if not chunks:
-        #         print("No context found.")
-        #         continue
+            print("\nSources:\n")
+            for i,c in enumerate(chunks,start=1):
+                print(c)
+                # print(f"[{i}] score={c['score']:.4f}")
+                # print(c['text'][:200].replace('\n',' '), "...\n")
 
-        #     llm = LLM()
-        #     answer = llm.generate_answer(question, chunks)
 
-        #     print("\n==================== AI ANSWER ====================\n")
-        #     print(answer)
-        #     print("\n====================================================\n")
+
+
 
         else:
             print("Invalid selection. Please choose a valid menu option.")    

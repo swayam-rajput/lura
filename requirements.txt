@@ -7,3 +7,5 @@ python-docx
 python-magic
 tqdm
 python-dateutil
+docx
+tqdm

@@ -1,29 +1,23 @@
 # src/llm/local_llm.py
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from ctransformers import AutoModelForCausalLM
-import torch
-import threading
-
+from llama_cpp import Llama
 
 class LLM:
-    def __init__(self, model_name="microsoft/phi-2", device=None):
-        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        print(f"loading local model on {self.device}...")
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(
-            model_name, torch_dtype=torch.float16 if self.device == "cuda" else torch.float32
-        ).to(self.device)
-
-    def generate_answer(self, query, retrieved_chunks, max_new_tokens=200):
-        context = "\n\n".join(retrieved_chunks)
-        print(retrieved_chunks)
-        prompt = (
-            f"Context:\n{context}\n\nIf the context does not contain the answer, say \"I don't know.\" Do not hallucinate."
-            f"Question: {query}\n\n"
-            f"Answer concisely and clearly:"
+    def __init__(self, model_path="models/model.gguf"):
+        print("Loading GGUF model...")
+        self.llm = Llama(
+            model_path=model_path,
+            n_threads=8,
+            n_ctx=4096
         )
-        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
-        output = self.model.generate(**inputs, max_new_tokens=max_new_tokens)
-        answer = self.tokenizer.decode(output[0], skip_special_tokens=True)
-        
-        return answer
+        print("Model loaded.")
+
+    def generate(self, query, retrieved_chunks, max_new_tokens=200):
+        context = "\n\n".join(ch["text"] for ch in retrieved_chunks)
+        prompt = (
+            f"Use the context to answer. If answer isn't in context, say 'I don't know.'\n\n"
+            f"Context:\n{context}\n\n"
+            f"Question: {query}\n\nAnswer:"
+        )
+
+        result = self.llm(prompt, max_tokens=max_new_tokens)
+        return result["choices"][0]["text"].strip()
