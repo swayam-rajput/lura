@@ -1,5 +1,6 @@
-src\vector_index.faiss.meta
-src\vector_index.faiss
+src/vector_index.faiss.meta
+src/vector_index.faiss
+tests/
 # OS garbage
 .DS_Store
 Thumbs.db
