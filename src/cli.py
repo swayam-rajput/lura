@@ -147,7 +147,6 @@ def main():
             print("Invalid selection. Please choose a valid menu option.")    
         input('> ')
 
-    print("No operation executed. Use --help for available commands.")
 
 
 if __name__ == "__main__":

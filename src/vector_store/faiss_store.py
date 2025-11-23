@@ -137,6 +137,14 @@ class FaissStore:
 
         return results
 
-
     def get_index_path(self):
         return self.index_path
+    
+    def reset_index(self):
+        """Completely clears index + documents."""
+        self.index = faiss.IndexFlatIP(self.dim)
+        self.documents = []
+        self.doc_paths = []
+        self.chunk_ids = []
+        faiss.write_index(self.index, self.index_path)
+        open(self.meta_path, "w").close()
