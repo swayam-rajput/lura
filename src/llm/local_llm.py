@@ -1,4 +1,3 @@
-# src/llm/local_llm.py
 from llama_cpp import Llama
 
 class LLM:
