@@ -1,3 +1,5 @@
+src\vector_index.faiss.meta
+src\vector_index.faiss
 # OS garbage
 .DS_Store
 Thumbs.db
@@ -14,10 +16,14 @@ npm-debug.log*
 
 # Python
 __pycache__/
+# __pycache__
 *.pyc
 *.pyo
 *.pyd
 *.sqlite3
+
+# Llama models
+models/
 
 # Node.js
 node_modules/
