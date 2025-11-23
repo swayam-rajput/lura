@@ -67,8 +67,8 @@ def ingest_file(path:str):
     vectors = embeds.embed_texts(chunks)
     data = MetaData(path,texts,chunks,vectors)
     fs = FaissStore()
-    print(len(data.vectors),len(data.chunks))
-    print(data.chunks)
+    # print(len(data.vectors),len(data.chunks))
+    # print(data.chunks)
     fs.add_vectors(data.vectors,data.chunks)
     fs.save_index()
             
