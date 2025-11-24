@@ -10,7 +10,7 @@ class FaissStore:
     Local vector database using FAISS + JSON metadata
     """
 
-    def __init__(self, dim: int = 384, index_path: str = INDEX_PATH, model_name:str = "sentence-transformers/all-MiniLM-L6-v2"):
+    def __init__(self, dim: int = 384, index_path: str = INDEX_PATH, model_name:str = "sentence-transformers/all-MiniLM-L12-v2"):
         self.dim = dim
         self.model_name = model_name
         self.index_path = index_path
@@ -149,16 +149,17 @@ class FaissStore:
 
         top = float(s[0])
         second = float(s[1]) if len(s) > 1 else 0.0
-
-        if top < 0.22:          
+        if top < 0.15:          
             return []
+        print('score of result',top)
 
-        if abs(top - second) < 0.03:
+        if abs(top - second) < 0.005:
             return []
+        print('abs')
 
         results = []
         for idx, score in zip(idxs, s):
-            if score < 0.22:
+            if score < 0.15:
                 continue
             if 0 <= idx < len(self.documents):
                 results.append({
@@ -168,7 +169,7 @@ class FaissStore:
                     "chunk_id": self.chunk_ids[idx],
                     "score": float(score)
                 })
-
+        print('results >',results)
         return results
 
     def get_index_path(self):

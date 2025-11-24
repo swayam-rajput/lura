@@ -135,12 +135,12 @@ def main():
             answer, chunks = run_rag(question)
 
             print('Answer:\n>',answer)
-
+            input('\nPress Enter to see sources ')
             print("\nSources:\n")
             for i,c in enumerate(chunks,start=1):
-                print(c)
-                # print(f"[{i}] score={c['score']:.4f}")
-                # print(c['text'][:200].replace('\n',' '), "...\n")
+                # print(c)
+                print(f"[{i}] id={c['id']} score={c['score']:.4f}")
+                print(c['text'][:200].replace('\n',' '), "...\n")
 
 
 
