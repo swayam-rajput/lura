@@ -52,7 +52,7 @@ def ingest_directory(folder_path: str):
             chunks = chunk_text(text)
             vectors = embedder.embed_texts(chunks)
 
-            fs.add_vectors(vectors, chunks, file_path=path)
+            fs.add_vectors(vectors, chunks, file_path=path, embedder_model=embedder.model_name)
             print(f"[Ingested] {path} → {len(chunks)} chunks")
 
     fs.save_index()
@@ -62,16 +62,19 @@ def ingest_directory(folder_path: str):
 def ingest_file(path:str):
     texts = load_text(path)
     chunks = chunk_text(texts)
-    embeds = EmbeddingModel()
+    if not chunks or len(chunks) == 0:
+        print(f'[File Skipped] No text found in {path}')
+        return
     
+    embeds = EmbeddingModel()
     vectors = embeds.embed_texts(chunks)
     data = MetaData(path,texts,chunks,vectors)
     fs = FaissStore()
     # print(len(data.vectors),len(data.chunks))
     # print(data.chunks)
-    fs.add_vectors(data.vectors,data.chunks)
+    fs.add_vectors(data.vectors,data.chunks,embedder_model=embeds.model_name)
     fs.save_index()
-            
+    print(f"[OK] Ingested {path} — {len(chunks)} chunks")
 
 def main():
 

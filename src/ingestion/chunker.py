@@ -8,7 +8,6 @@ def chunk_text(text: str, max_tokens: int = 500, overlap: int = 50) -> list[str]
     """
     encoding = tiktoken.get_encoding("cl100k_base")
     tokens = encoding.encode(text)
-    print(tokens)
     num_tokens = len(tokens)
 
     chunks = []
@@ -21,8 +20,8 @@ def chunk_text(text: str, max_tokens: int = 500, overlap: int = 50) -> list[str]
         chunks.append(chunk_text)
         start += max_tokens-overlap
     
-    print(f"✅ Created {len(chunks)} chunks (~{num_tokens} tokens total).")
-    print('Chunks\n',chunks)
+    print(f"[Chunks created] {len(chunks)} chunks (~{num_tokens} tokens total).")
+
     return chunks
 
 if __name__=="__main__":

@@ -14,7 +14,7 @@ class LLM:
     def _build_prompt(self,question, chunks):
         context = ''
         for i, c in enumerate(chunks):
-            clean = c['text'].replace('\n',' ')
+            clean = ' '.join(c['text'].split())
             context += f'[Chunk {i}] {clean}\n\n'
         
         system_prompt = (
