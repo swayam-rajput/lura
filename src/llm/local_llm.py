@@ -7,7 +7,8 @@ class LLM:
             model_path=model_path,
             n_threads=8,
             n_ctx=4096,
-            chat_format='qwen'
+            chat_format='qwen',
+            verbose=False
         )
         print("Model loaded.")
     

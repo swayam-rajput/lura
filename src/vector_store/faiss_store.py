@@ -3,7 +3,7 @@ import numpy as np
 import os
 import json
 
-INDEX_PATH = "src/vector_index.faiss"
+INDEX_PATH = "src/faiss/vector_index.faiss"
 
 class FaissStore:
     """

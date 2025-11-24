@@ -4,7 +4,7 @@ import numpy as np
 
 
 class Retriever:
-    def __init__(self, index_path='src/vector_index.faiss',top_k:int = 5,chunks=None):
+    def __init__(self, index_path='src/faiss/vector_index.faiss',top_k:int = 5,chunks=None):
         self.index_path = index_path
         self.top_k = top_k
         
