@@ -99,8 +99,8 @@ def main():
             folder = input("Enter directory path: ").strip()
             ingest_directory(folder)
 
-        # elif choice == "3":
-        #     build_vector_index()
+        elif choice == "3":
+            build_vector_index()
 
         elif choice == "4":
             query = input("Enter your query: ").strip()

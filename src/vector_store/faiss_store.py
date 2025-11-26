@@ -23,7 +23,7 @@ class FaissStore:
         self.chunk_ids = []
 
         # Auto-load index + metadata if present
-        if os.path.exists(self.index_path) and os.path.exists(self.meta_path):
+        if os.path.exists(self.index_path):
             self.load_index()
 
     def add_vectors(self, vectors: np.ndarray, texts: list[str], file_path: str = None, embedder_model:str=None):
@@ -50,10 +50,13 @@ class FaissStore:
         
         self.index.add(vectors)
 
+        start = len(self.documents)
+
         self.documents.extend(texts)
         self.doc_paths.extend([file_path] * len(texts))
-        start = len(self.chunk_ids)
+
         self.chunk_ids.extend(range(start, start + len(texts)))
+
 
         print(f"Added {len(vectors)} vectors. Total docs: {len(self.documents)}")
 
@@ -62,7 +65,7 @@ class FaissStore:
         """
         Save FAISS + JSON metadata properly
         """
-
+        print("[Saving Index...]")
         os.makedirs(os.path.dirname(self.index_path) or ".", exist_ok=True)
 
         # Build metadata JSON
@@ -81,12 +84,11 @@ class FaissStore:
                 "chunk_id": self.chunk_ids[i]
             })
 
-        # Save JSON
         with open(self.meta_path, "w", encoding="utf-8") as f:
             json.dump(metadata, f, ensure_ascii=False, indent=4)
 
-        # Save FAISS index
         faiss.write_index(self.index, self.index_path)
+        print('[Index Saving Complete]')
 
 
     def load_index(self):
@@ -149,13 +151,12 @@ class FaissStore:
 
         top = float(s[0])
         second = float(s[1]) if len(s) > 1 else 0.0
-        if top < 0.15:          
+        if top < 0.05:          
             return []
-        print('score of result',top)
 
-        if abs(top - second) < 0.005:
-            return []
-        print('abs')
+        # if abs(top - second) < 0.005:
+        #     return []
+        # removing these two lines causes significant changes to be observed
 
         results = []
         for idx, score in zip(idxs, s):
@@ -169,17 +170,33 @@ class FaissStore:
                     "chunk_id": self.chunk_ids[idx],
                     "score": float(score)
                 })
-        print('results >',results)
+        
         return results
 
+    
     def get_index_path(self):
         return self.index_path
     
+
     def reset_index(self):
-        """Completely clears index + documents."""
+        """
+        Completely wipes FAISS index + metadata.
+        After calling this, the system has zero documents.
+        """
         self.index = faiss.IndexFlatIP(self.dim)
+
         self.documents = []
         self.doc_paths = []
         self.chunk_ids = []
+
         faiss.write_index(self.index, self.index_path)
-        open(self.meta_path, "w").close()
+
+        with open(self.meta_path, "w", encoding="utf-8") as f:
+            f.write(json.dumps({
+                "dim": self.dim,
+                "embedding_model": self.model_name,
+                "count": 0,
+                "chunks": []
+            }, indent=4))
+        
+        print("[RESET] FAISS index + metadata cleared.")
