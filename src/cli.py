@@ -83,7 +83,7 @@ def main():
         print("\n==================== OFFLINE AI ENGINE ====================")
         print("1. Ingest a single file")
         print("2. Ingest an entire directory")
-        print("3. Build / Rebuild vector index")
+        print("3. Reset vector index")
         print("4. Run semantic query")
         print("5. Exit")
         print("============================================================")
@@ -100,7 +100,7 @@ def main():
             ingest_directory(folder)
 
         elif choice == "3":
-            build_vector_index()
+            FaissStore.reset_index(index_path='faiss/vector_index.faiss')
 
         elif choice == "4":
             query = input("Enter your query: ").strip()

@@ -177,26 +177,28 @@ class FaissStore:
     def get_index_path(self):
         return self.index_path
     
-
-    def reset_index(self):
+    @staticmethod
+    def reset_index(index_path):
         """
         Completely wipes FAISS index + metadata.
         After calling this, the system has zero documents.
         """
-        self.index = faiss.IndexFlatIP(self.dim)
-
-        self.documents = []
-        self.doc_paths = []
-        self.chunk_ids = []
-
-        faiss.write_index(self.index, self.index_path)
-
-        with open(self.meta_path, "w", encoding="utf-8") as f:
-            f.write(json.dumps({
-                "dim": self.dim,
-                "embedding_model": self.model_name,
-                "count": 0,
-                "chunks": []
-            }, indent=4))
+        meta_path = index_path + ".meta"
+        print('Index and Meta File found\nRemoving...')
         
-        print("[RESET] FAISS index + metadata cleared.")
+        # Remove files if they exist
+        if os.path.exists(index_path):
+            os.remove(index_path)
+        if os.path.exists(meta_path):
+            os.remove(meta_path)
+
+        # Create fresh empty index
+        dim = 384
+        empty_index = faiss.IndexFlatIP(dim)
+        faiss.write_index(empty_index, index_path)
+
+        # Empty meta.json
+        with open(meta_path, "w", encoding="utf-8") as f:
+            json.dump({"dim": dim, "embedding_model": None, "chunks": []}, f, indent=4)
+
+        print("[OK] Index fully reset.")
