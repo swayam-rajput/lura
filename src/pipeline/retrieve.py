@@ -4,6 +4,8 @@ import numpy as np
 
 
 class Retriever:
+    _instance = None
+
     def __init__(self, index_path='src/faiss/vector_index.faiss',top_k:int = 5,chunks=None):
         self.index_path = index_path
         self.top_k = top_k
@@ -19,6 +21,12 @@ class Retriever:
             self.store.load_index()
         except:
             print('[Retriever] Warning: Index failed to load')
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance.store = FaissStore()
+        return cls._instance
     
 
     def _embed(self, text:str)-> np.ndarray:

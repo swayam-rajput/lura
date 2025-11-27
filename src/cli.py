@@ -4,7 +4,9 @@ from ingestion.chunker import chunk_text
 from storage.faiss_store import FaissStore
 from pipeline.retrieve import Retriever
 import os
-from inference.local_llm import LLM
+from InquirerPy import inquirer
+from rich.console import Console
+
 
 MODEL_NAME = 'sentence-transformers/all-MiniLM-L12-v2'
 class MetaData:
@@ -27,34 +29,34 @@ class MetaData:
         }
 
 def ingest_directory(folder_path: str):
-    """
-    Ingest every supported file inside a directory (recursively).
-    """
-    fs = FaissStore()                 # loads existing index automatically
+
+    fs = FaissStore()
     embedder = EmbeddingModel()
 
     supported_extensions = {".txt", ".md", ".pdf", ".docx"}
 
+    all_files = []
     for root, _, files in os.walk(folder_path):
         for file in files:
-            path = os.path.join(root, file)
-            ext = os.path.splitext(file)[1].lower()
+            all_files.append(os.path.join(root, file))
 
-            if ext not in supported_extensions:
-                print(f"Skipping unsupported file: {path}")
-                continue
+    print(f"[Scan] Found {len(all_files)} files.")
 
-            try:
-                text = load_text(path)
-            except Exception as e:
-                print(f"Could not read {path}: {e}")
-                continue
+    for path in all_files:
+        ext = os.path.splitext(path)[1].lower()
+        if ext not in supported_extensions:
+            continue
 
-            chunks = chunk_text(text)
-            vectors = embedder.embed_texts(chunks)
+        try:
+            text = load_text(path)
+        except:
+            continue
 
-            fs.add_vectors(vectors, chunks, file_path=path, embedder_model=embedder.model_name)
-            print(f"[Ingested] {path} → {len(chunks)} chunks")
+        chunks = chunk_text(text)
+
+        vectors = embedder.model.encode(chunks, show_progress_bar=True)
+
+        fs.add_vectors(vectors, chunks, file_path=path, embedder_model=embedder.model_name)
 
     fs.save_index()
     print("\n>>> Directory ingestion complete.\n")
@@ -79,23 +81,43 @@ def ingest_file(path:str):
 
 def main():
     try:
+        console = Console()
+        
+        logo = """
+        ██╗     ██╗   ██╗██████╗  █████╗ 
+        ██║     ██║   ██║██╔══██╗██╔══██╗
+        ██║     ██║   ██║██████╔╝███████║
+        ██║     ██║   ██║██╔══██╗██╔══██║
+        ███████╗╚██████╔╝██║  ██║██║  ██║
+        ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
+        """
+        console.print(logo)
         while True:
-            
-            print("\n==================== OFFLINE AI ENGINE ====================")
-            print("1. Ingest a single file")
-            print("2. Ingest an entire directory")
-            print("3. Reset vector index")
-            print("4. Run semantic search")
-            print("5. Run RAG query")
-            print("6. Show index stats")
-            print("7. Exit")
-            print("============================================================")
 
-            choice = input("Select an operation: ").strip()
+            # console.rule("[bold blue]Lura")
+
+            choice = inquirer.select(
+                message="Select an option:",
+                choices=[
+                    "1. Ingest a single file",
+                    "2. Ingest an entire directory",
+                    "3. Reset vector index",
+                    "4. Run semantic search",
+                    "5. Run RAG query",
+                    "6. Show index stats",
+                    "7. Exit"
+                ],
+                default=None,
+                pointer=">",
+                
+            ).execute()
+            choice = (choice[0])
+
 
             if choice == "1":
                 
                 file_path = input("Enter file path: ").strip()
+                
                 ingest_file(file_path)
         
             elif choice == "2":
@@ -106,6 +128,7 @@ def main():
                 index_path = 'src/faiss/vector_index.faiss'
                 if os.path.exists(index_path):
                     FaissStore.reset_index(index_path=index_path,model_name=MODEL_NAME)
+                    Retriever._instance = None
 
             elif choice == "4":
                 query = input("Enter your query: ").strip()
@@ -130,6 +153,7 @@ def main():
             elif choice == "5":
                 from pipeline.rag import run_rag
                 question = input("Enter your question: ").strip()
+                console.print("\n[dim]Loading...[/]\n")
                 answer, chunks = run_rag(question)
 
                 print('Answer:\n>',answer)
@@ -143,12 +167,11 @@ def main():
                 # 6. Show index stats
             elif choice == "6":
                 fs = FaissStore()
-                print("\n----- Index Stats -----\n")
-                print("Embedding model:", fs.model_name)
-                print("Vector dimension:", fs.dim)
-                print("Chunks indexed:", len(fs.documents))
-                print("FAISS index path:", fs.index_path)
-                print("------------------------\n")
+                print("\nIndex Stats\n")
+                print("  Embedding model:", fs.model_name)
+                print("  Vector dimension:", fs.dim)
+                print("  Chunks indexed:", len(fs.documents))
+                print("  FAISS index path:", fs.index_path)
             
             
             elif choice == "7":

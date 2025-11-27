@@ -1,6 +1,7 @@
 
 from sentence_transformers import SentenceTransformer
 import numpy as np
+from tqdm import tqdm
 
 class EmbeddingModel:
     """
@@ -20,7 +21,7 @@ class EmbeddingModel:
         """
         embeddings = self.model.encode(
             texts,
-            show_progress_bar=True,
+            show_progress_bar=False,
             convert_to_numpy=True,
             normalize_embeddings=True
         )
