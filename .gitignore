@@ -2,6 +2,7 @@ src/faiss/
 src/faiss/vector_index.faiss.meta
 src/faiss/vector_index.faiss
 tests/
+*/__pycache__
 # OS garbage
 .DS_Store
 Thumbs.db
