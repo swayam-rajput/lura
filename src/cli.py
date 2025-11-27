@@ -1,11 +1,12 @@
-from embeddings.embedder import EmbeddingModel
+from encoder.embedder import EmbeddingModel
 from ingestion.text_loader import load_text
 from ingestion.chunker import chunk_text
-from vector_store.faiss_store import FaissStore
-from query_pipeline.retrieve import Retriever
+from storage.faiss_store import FaissStore
+from pipeline.retrieve import Retriever
 import os
-from llm.local_llm import LLM
+from inference.local_llm import LLM
 
+MODEL_NAME = 'sentence-transformers/all-MiniLM-L12-v2'
 class MetaData:
     def __init__(self,file_path=None,texts=None,chunks=None,vectors=None):
         self.file_path = file_path
@@ -77,80 +78,90 @@ def ingest_file(path:str):
     print(f"[OK] Ingested {path} — {len(chunks)} chunks")
 
 def main():
+    try:
+        while True:
+            
+            print("\n==================== OFFLINE AI ENGINE ====================")
+            print("1. Ingest a single file")
+            print("2. Ingest an entire directory")
+            print("3. Reset vector index")
+            print("4. Run semantic search")
+            print("5. Run RAG query")
+            print("6. Show index stats")
+            print("7. Exit")
+            print("============================================================")
 
-    while True:
+            choice = input("Select an operation: ").strip()
+
+            if choice == "1":
+                
+                file_path = input("Enter file path: ").strip()
+                ingest_file(file_path)
         
-        print("\n==================== OFFLINE AI ENGINE ====================")
-        print("1. Ingest a single file")
-        print("2. Ingest an entire directory")
-        print("3. Reset vector index")
-        print("4. Run semantic query")
-        print("5. Exit")
-        print("============================================================")
+            elif choice == "2":
+                folder = input("Enter directory path: ").strip()
+                ingest_directory(folder)
 
-        choice = input("Select an operation: ").strip()
+            elif choice == "3":
+                index_path = 'src/faiss/vector_index.faiss'
+                if os.path.exists(index_path):
+                    FaissStore.reset_index(index_path=index_path,model_name=MODEL_NAME)
 
-        if choice == "1":
+            elif choice == "4":
+                query = input("Enter your query: ").strip()
+                
+                result = Retriever().search(query)
+                
+                print("\n----- Query Response -----\n")
+                
+                if not result:
+                    print("No relevant results found.\nYour query does not match anything in the indexed data.")
+                    print("--------------------------\n")
+                    input('> ')
+                    continue
+                
+                for i,r in enumerate(result):
+                    print(f"[{i}] id:{r['id']} Score: {r['score']:.4f}")
+                    print("    Text :",(r['text'].replace('\n',' '))[:300])
+                
+                print("\n--------------------------\n")
+
+            # LLM (RAG)
+            elif choice == "5":
+                from pipeline.rag import run_rag
+                question = input("Enter your question: ").strip()
+                answer, chunks = run_rag(question)
+
+                print('Answer:\n>',answer)
+                input('\nPress Enter to see sources ')
+                print("\nSources:\n")
+                for i,c in enumerate(chunks,start=1):
+                    # print(c)
+                    print(f"[{i}] id={c['id']} score={c['score']:.4f}")
+                    print(c['text'][:300].replace('\n',' '), "...\n")
             
-            file_path = input("Enter file path: ").strip()
-            ingest_file(file_path)
-    
-        elif choice == "2":
-            folder = input("Enter directory path: ").strip()
-            ingest_directory(folder)
-
-        elif choice == "3":
-            FaissStore.reset_index(index_path='faiss/vector_index.faiss')
-
-        elif choice == "4":
-            query = input("Enter your query: ").strip()
+                # 6. Show index stats
+            elif choice == "6":
+                fs = FaissStore()
+                print("\n----- Index Stats -----\n")
+                print("Embedding model:", fs.model_name)
+                print("Vector dimension:", fs.dim)
+                print("Chunks indexed:", len(fs.documents))
+                print("FAISS index path:", fs.index_path)
+                print("------------------------\n")
             
-            result = Retriever().search(query)
             
+            elif choice == "7":
+                print("Shutting down operational workflow.")
+                # sys.exit(0)
+                return
 
+            else:
+                print("Invalid selection. Please choose a valid menu option.")    
+            input('> ')
 
-            print("\n----- Query Response -----\n")
-            
-            if not result:
-                print("No relevant results found.\nYour query does not match anything in the indexed data.")
-                print("--------------------------\n")
-                input('> ')
-                continue
-            
-            for i,r in enumerate(result):
-                print(f"[{i}] Score: {r['score']:.4f}")
-                print("    Text :",r['text'].replace('\n',' '))
-            
-            print("\n--------------------------\n")
-
-        elif choice == "5":
-            print("Shutting down operational workflow.")
-            # sys.exit(0)
-            return
-
-        # LLM (RAG)
-        elif choice == "6":
-            from query_pipeline.rag import run_rag
-            question = input("Enter your question: ").strip()
-            answer, chunks = run_rag(question)
-
-            print('Answer:\n>',answer)
-            input('\nPress Enter to see sources ')
-            print("\nSources:\n")
-            for i,c in enumerate(chunks,start=1):
-                # print(c)
-                print(f"[{i}] id={c['id']} score={c['score']:.4f}")
-                print(c['text'][:200].replace('\n',' '), "...\n")
-
-
-
-
-
-        else:
-            print("Invalid selection. Please choose a valid menu option.")    
-        input('> ')
-
-
+    except KeyboardInterrupt as keyboardintp:
+        print('\n[Ctrl + C pressed] Exiting...')
 
 if __name__ == "__main__":
     main()

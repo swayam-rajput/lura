@@ -1,5 +1,5 @@
-from query_pipeline.retrieve import Retriever
-from src.llm.local_llm import LLM
+from pipeline.retrieve import Retriever
+from src.inference.local_llm import LLM
 
 class QueryPipeline:
     def __init__(self, retriever: Retriever, llm: LLM):

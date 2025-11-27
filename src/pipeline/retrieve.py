@@ -1,5 +1,5 @@
-from embeddings.embedder import EmbeddingModel
-from vector_store.faiss_store import FaissStore
+from encoder.embedder import EmbeddingModel
+from storage.faiss_store import FaissStore
 import numpy as np
 
 

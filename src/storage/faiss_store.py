@@ -178,7 +178,7 @@ class FaissStore:
         return self.index_path
     
     @staticmethod
-    def reset_index(index_path):
+    def reset_index(index_path,model_name):
         """
         Completely wipes FAISS index + metadata.
         After calling this, the system has zero documents.
@@ -195,10 +195,11 @@ class FaissStore:
         # Create fresh empty index
         dim = 384
         empty_index = faiss.IndexFlatIP(dim)
+
         faiss.write_index(empty_index, index_path)
 
         # Empty meta.json
         with open(meta_path, "w", encoding="utf-8") as f:
-            json.dump({"dim": dim, "embedding_model": None, "chunks": []}, f, indent=4)
+            json.dump({"dim": dim, "embedding_model": model_name, "chunks": []}, f, indent=4)
 
         print("[OK] Index fully reset.")
