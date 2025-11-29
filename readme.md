@@ -35,11 +35,28 @@ Drop any GGUF model as `models/model.gguf`, and Lura will load it through `llama
 - Ideal for learning embeddings, RAG, FAISS, and local LLM inference
 
 
-## Requirements
+## Installation (Using Virtual Environment)
+#### 1. Clone the Repository
 
-#### Python
 ```
-Python 3.10 or 3.11
+git clone <your-repo-url>
+cd <your-project-folder>
+```
+#### 2. Create a Virtual Environment
+Use Python 3.10 or 3.11:
+    
+```
+python -m venv venv
+```
+#### 3. Activate the Virtual Environment
+
+- Windows: `venv\Scripts\activate`
+
+- macOS/Linux: `source venv/bin/activate`
+
+#### 4. Upgrade pip
+```
+pip install --upgrade pip
 ```
 
 #### Dependencies
@@ -58,15 +75,14 @@ Includes:
 - `tqdm`
 
 
+
+## Requirements
+
 #### Model Requirements
----
-#### Embedding Model
 
-This project uses:
+#### 1.  Embedding Model
 
-```
-sentence-transformers/all-MiniLM-L12-v2
-```
+This project uses: `sentence-transformers/all-MiniLM-L12-v2`
 
 Download it once:
 
@@ -80,7 +96,7 @@ Place the transformer in `models/embeddings/all-MiniLM-L12-v2`
 
 #### If the download fails, run the code below:
 
-```
+```python
 from sentence_transformers import SentenceTransformer
 
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L12-v2")
@@ -92,7 +108,7 @@ After this, the model will live in your local HuggingFace cache and the system w
 
 ---
 
-#### LLM Setup
+####  2. LLM Setup
 #### Place your GGUF LLM here:
 
 ```
@@ -243,5 +259,7 @@ tests/
 - Large PDFs may produce many chunks — ingestion may take time.
 - CPU-only inference is slower; optional GPU layers can be enabled.
 
-### License
+## License
 MIT License.
+
+
