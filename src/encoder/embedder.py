@@ -1,7 +1,6 @@
 
 from sentence_transformers import SentenceTransformer
 import numpy as np
-from tqdm import tqdm
 
 class EmbeddingModel:
     """
@@ -11,7 +10,8 @@ class EmbeddingModel:
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L12-v2"):
         # Load the model locally (no API calls)
         print(f"[EmbeddingModel] Loading model: {model_name}")
-        self.model = SentenceTransformer(model_name)
+        local_path = './models/embeddings/all-MiniLM-L12-v2'
+        self.model = SentenceTransformer(local_path,local_files_only=True)
         self.model_name = model_name
         self.dim = self.model.get_sentence_embedding_dimension()
 
