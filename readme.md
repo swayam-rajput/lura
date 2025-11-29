@@ -59,7 +59,7 @@ Includes:
 
 
 #### Model Requirements
-### Embedding Model
+#### Embedding Model
 
 This project uses:
 
