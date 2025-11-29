@@ -198,7 +198,44 @@ If answer is not in context, say "I don't know."
 ### ANSWER ###
 ```
 
- 
+## Folder Structure
+```
+models/
+│── embeddings/
+     └── all-MiniLM-L12-v2/
+            └──...
+│── model.gguf
+└── qwen2.5-1.5b-instruct-q4_k_m.gguf
+
+src/
+│── cli.py
+│
+├── encoder/
+│     └── embedder.py
+│
+├── faiss/
+│     └── ... (FAISS utilities)
+│
+├── inference/
+│     └── local_llm.py
+│
+├── ingestion/
+│     └── ... (file ingestion + chunking)
+│
+├── interface/
+│     └── ... (CLI/UI hooks)
+│
+├── pipeline/
+│     ├── pipeline.py
+│     ├── rag.py
+│     └── retrieve.py
+│
+└── storage/
+      └── faiss_store.py
+
+tests/
+└── data.txt
+``` 
 
 ## Notes
 - Embedding model must remain consistent unless index is reset.
@@ -206,9 +243,5 @@ If answer is not in context, say "I don't know."
 - Large PDFs may produce many chunks — ingestion may take time.
 - CPU-only inference is slower; optional GPU layers can be enabled.
 
-
 ### License
-
 MIT License.
-
-
