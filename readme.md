@@ -57,8 +57,41 @@ Includes:
 - `python-docx`
 - `tqdm`
 
-#### Model Requirements
 
+#### Model Requirements
+### Embedding Model
+
+This project uses:
+
+```
+sentence-transformers/all-MiniLM-L12-v2
+```
+
+Download it once:
+
+```
+python -m sentence_transformers.download all-MiniLM-L12-v2
+```
+
+Place the transformer in `models/embeddings/all-MiniLM-L12-v2`
+
+#### OR
+
+#### If the download fails, run the code below:
+
+```
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L12-v2")
+
+model.save("models/embeddings/all-MiniLM-L12-v2")
+```
+
+After this, the model will live in your local HuggingFace cache and the system will run fully offline.
+
+---
+
+#### LLM Setup
 #### Place your GGUF LLM here:
 
 ```
